@@ -101,7 +101,7 @@ public class AutoEat extends Module {
     );
 
     public boolean eating;
-    private int slot, prevSlot;
+    private int slot, prevSlot, hungerLevel;
 
     private final List<Class<? extends Module>> wasAura = new ArrayList<>();
     private boolean wasBaritone = false;
@@ -117,12 +117,15 @@ public class AutoEat extends Module {
 
     @EventHandler(priority = EventPriority.LOW)
     private void onTick(TickEvent.Pre event) {
+        // Get the hunger level to check if the eating action is available
+        hungerLevel = mc.player.getHungerManager().getFoodLevel();
+        
         // Skip if Auto Gap is already eating
         if (Modules.get().get(AutoGap.class).isEating()) return;
 
         if (eating) {
             // If we are eating check if we should still be eating
-            if (shouldEat()) {
+            if (shouldEat() && hungerLevel < 20) {
                 // Check if the item in current slot is not food
                 if (mc.player.getInventory().getStack(slot).get(DataComponentTypes.FOOD) != null) {
                     // If not try finding a new slot
@@ -148,7 +151,7 @@ public class AutoEat extends Module {
             }
         } else {
             // If we are not eating check if we should start eating
-            if (shouldEat()) {
+            if (shouldEat() && hungerLevel < 20) {
                 // Try to find a valid slot
                 slot = findSlot();
 
